@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface Message {
   text: string;
@@ -6,8 +6,23 @@ interface Message {
 }
 
 const Chat = () => {
-  const messages: Message[] = [];
-
+  const [inputText, setInputText] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>();
+  //   const messages: Message[] = [];
+  const msgSend = () => {
+    const newMessage: Message = {
+      text: inputText,
+      sender: "me",
+    };
+    setMessages((prev) => [...(prev || []), newMessage]);
+    setInputText("");
+  };
+  const handleEnterKey = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      msgSend();
+    }
+  };
   return (
     <React.Fragment>
       <div className="text-green-400 text-xl text-center font-semibold">
@@ -30,12 +45,17 @@ const Chat = () => {
         </div>
         <div className="w-[800px] flex">
           <textarea
-            name="my input"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleEnterKey}
             className="w-full border h-20 text-slate-600 p-5 text-lg rounded-bl-lg overflow-y-auto resize-none whitespace-pre-wrap
-            scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 
-            hover:scrollbar-thumb-gray-500"
+                scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 
+                hover:scrollbar-thumb-gray-500"
           />
-          <button className="border rounded-br-lg bg-green-500 p-4 text-sm font-bold hover:bg-green-300 active:bg-blue-300">
+          <button
+            className="border rounded-br-lg bg-green-500 p-4 text-sm font-bold hover:bg-green-300 active:bg-blue-300"
+            onClick={msgSend}
+          >
             Send !
           </button>
         </div>
