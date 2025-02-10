@@ -11,6 +11,7 @@ interface Message {
 
 const Chat = () => {
   // const socket = io("http://localhost:8080/");
+  const [online, setOnline] = useState<boolean>(false);
   const [friend, setFriend] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
   const [inputuser, setInputuser] = useState<string>("");
@@ -18,14 +19,14 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>();
 
   //   const messages: Message[] = [];
-  const test = async () => {
-    try {
-      const text = await axios.get("http://localhost:8080/funny");
-      console.log(text.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const test = async () => {
+  //   try {
+  //     const text = await axios.get("http://localhost:8080/funny");
+  //     console.log(text.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const msgSend = () => {
     if (inputText !== "") {
@@ -34,7 +35,7 @@ const Chat = () => {
         sender: "me",
       };
       setMessages((prev) => [...(prev || []), newMessage]);
-      socket.emit("message", inputText);
+      socket.emit("message", { text: inputText, to: friend });
       setInputText("");
     }
   };
@@ -48,9 +49,10 @@ const Chat = () => {
   const connect = async (friend: string) => {
     try {
       const status = await axios.get(
-        `http://localhost/status-check?friend=${friend}`
+        `http://localhost:8080/status-check/${friend}`
       );
-      alert(status);
+      if (status.data) setOnline(true);
+      else setOnline(false);
     } catch (error) {
       console.log(error);
     }
@@ -58,6 +60,17 @@ const Chat = () => {
 
   useEffect(() => {
     console.log("useEffect running");
+  }, []);
+
+  useEffect(() => {
+    socket.on("receive_message", (data: { text: string; sender: string }) => {
+      console.log({ data });
+      const newMessabe: Message = {
+        text: data.text,
+        sender: data.sender,
+      };
+      setMessages((prev) => [...(prev || []), newMessabe]);
+    });
   }, []);
 
   useEffect(() => {
@@ -69,14 +82,14 @@ const Chat = () => {
   return (
     <React.Fragment>
       <div className="text-green-400 text-xl text-center font-semibold">
-        <div>
+        {/* <div>
           <button
             onClick={test}
             className="p-2 m-3 bg-red-500 text-white font-bold size-[15] text-center border border-whtie"
           >
             test button
           </button>
-        </div>
+        </div> */}
         <div>
           <div>
             <input
@@ -119,7 +132,13 @@ const Chat = () => {
             </button>
           </div>
         </div>
-        Person ur chatting
+        <p>
+          {online ? (
+            <span className="text-green-600">{friend}</span>
+          ) : (
+            <span className="text-red-600">{friend}</span>
+          )}
+        </p>
       </div>
       <div id="message-text-area" className="flex flex-col items-center mb-10">
         <div className="border border-white rounded-t-lg bg-[#202329] mt-10 mx-10 h-[600px] w-[800px] p-4 overflow-y-auto flex flex-col gap-4">
