@@ -11,7 +11,9 @@ interface Message {
 
 const Chat = () => {
   // const socket = io("http://localhost:8080/");
-
+  const [friend, setFriend] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+  const [inputuser, setInputuser] = useState<string>("");
   const [inputText, setInputText] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>();
 
@@ -43,9 +45,26 @@ const Chat = () => {
     }
   };
 
+  const connect = async (friend: string) => {
+    try {
+      const status = await axios.get(
+        `http://localhost/status-check?friend=${friend}`
+      );
+      alert(status);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     console.log("useEffect running");
   }, []);
+
+  useEffect(() => {
+    setInputText("");
+    setMessages([]);
+    socket.emit("register_user", userId);
+  }, [userId]);
 
   return (
     <React.Fragment>
@@ -53,10 +72,52 @@ const Chat = () => {
         <div>
           <button
             onClick={test}
-            className="p-10 text-white font-bold size-[15] text-center border border-whtie"
+            className="p-2 m-3 bg-red-500 text-white font-bold size-[15] text-center border border-whtie"
           >
             test button
           </button>
+        </div>
+        <div>
+          <div>
+            <input
+              value={inputuser}
+              onChange={(event) => {
+                setInputuser(event.target.value);
+              }}
+            />
+            <button
+              onClick={() => {
+                if (inputuser !== "") {
+                  setUserId(inputuser);
+                } else {
+                  alert("Please enter a user ID");
+                }
+              }}
+              className="p-2 m-3 bg-blue-500 text-white font-bold hover:bg-blue-400"
+            >
+              setYourId
+            </button>
+          </div>
+          <div>
+            <input
+              value={friend}
+              onChange={(event) => {
+                setFriend(event.target.value);
+              }}
+            />
+            <button
+              onClick={() => {
+                if (friend !== "") {
+                  connect(friend);
+                } else {
+                  alert("Please enter a user ID");
+                }
+              }}
+              className="p-2 m-3 bg-blue-500 text-white font-bold hover:bg-blue-400"
+            >
+              Connect
+            </button>
+          </div>
         </div>
         Person ur chatting
       </div>
