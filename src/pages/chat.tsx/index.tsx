@@ -1,21 +1,40 @@
-import React, { useState } from "react";
+"use client";
+import socket from "@/socket";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+// import { io } from "socket.io-client";
 
 interface Message {
   text: string;
-  sender: "me" | "other";
+  sender: "me" | string;
 }
 
 const Chat = () => {
+  // const socket = io("http://localhost:8080/");
+
   const [inputText, setInputText] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>();
+
   //   const messages: Message[] = [];
+  const test = async () => {
+    try {
+      const text = await axios.get("http://localhost:8080/funny");
+      console.log(text.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const msgSend = () => {
-    const newMessage: Message = {
-      text: inputText,
-      sender: "me",
-    };
-    setMessages((prev) => [...(prev || []), newMessage]);
-    setInputText("");
+    if (inputText !== "") {
+      const newMessage: Message = {
+        text: inputText,
+        sender: "me",
+      };
+      setMessages((prev) => [...(prev || []), newMessage]);
+      socket.emit("message", inputText);
+      setInputText("");
+    }
   };
   const handleEnterKey = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter") {
@@ -23,9 +42,22 @@ const Chat = () => {
       msgSend();
     }
   };
+
+  useEffect(() => {
+    console.log("useEffect running");
+  }, []);
+
   return (
     <React.Fragment>
       <div className="text-green-400 text-xl text-center font-semibold">
+        <div>
+          <button
+            onClick={test}
+            className="p-10 text-white font-bold size-[15] text-center border border-whtie"
+          >
+            test button
+          </button>
+        </div>
         Person ur chatting
       </div>
       <div id="message-text-area" className="flex flex-col items-center mb-10">
