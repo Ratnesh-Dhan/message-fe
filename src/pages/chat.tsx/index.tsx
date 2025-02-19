@@ -63,11 +63,11 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("receive_message", (data: { text: string; sender: string }) => {
+    socket.on("message", (data: { data: { text: string; sender: string } }) => {
       console.log({ data });
       const newMessabe: Message = {
-        text: data.text,
-        sender: data.sender,
+        text: data.data.text,
+        sender: data.data.sender,
       };
       setMessages((prev) => [...(prev || []), newMessabe]);
     });
